@@ -1,0 +1,935 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Apply for a Position",
+        "formDescription": "Fill in your details and paste your CV. We will review it and get back to you shortly.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "e.g. Ahmad Al-Hassan",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "placeholder": "your@email.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "placeholder": "+962 7x xxx xxxx"
+            },
+            {
+              "fieldLabel": "Position Applied For",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Software Engineer"
+                  },
+                  {
+                    "option": "Product Manager"
+                  },
+                  {
+                    "option": "Data Analyst"
+                  },
+                  {
+                    "option": "UX Designer"
+                  },
+                  {
+                    "option": "DevOps Engineer"
+                  },
+                  {
+                    "option": "Marketing Specialist"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Years of Experience",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Less than 1 year"
+                  },
+                  {
+                    "option": "1-2 years"
+                  },
+                  {
+                    "option": "3-5 years"
+                  },
+                  {
+                    "option": "6-10 years"
+                  },
+                  {
+                    "option": "More than 10 years"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "CV / Resume",
+              "fieldType": "file",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "LinkedIn Profile URL",
+              "placeholder": "https://linkedin.com/in/yourname"
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit Application"
+        }
+      },
+      "id": "5c6b63cf-2f1d-43ad-a9ab-e3b7ef5ae678",
+      "name": "📋 CV Application Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -1008,
+        144
+      ],
+      "webhookId": "9750b83e-a511-47b3-a71e-30a5184784c0"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Input Data\n- **Years of Experience (Declared via Form):** {{ $('📋 CV Application Form').item.json['Years of Experience'] }}\n- **Position Applied For (Declared via Form):** {{ $('📋 CV Application Form').item.json['Position Applied For'] }}\n- **Candidate Email:** {{ $('📋 CV Application Form').item.json['Email Address'] }}\n- **CV Text (Extracted):**\n{{ $json.text }}\n\n---\n\n# Role\nYou are a strict and uncompromising IT/AI Recruitment Auditor and Anti-Fraud Verification Officer. Your primary function is to cross-examine user-declared form data against the factual text extracted from their CV, spot inconsistencies, and ruthlessly filter out dishonest applicants.\n\n# Objective\nAnalyze the input data to verify correctness, determine the definitive routing category, and produce a structured JSON output. If any information mismatch, exaggeration, or lie is detected, the applicant must be flagged immediately as Rejected.\n\n# Current Date and Time\n{{ $now }}\n\n# Anti-Fraud and Disqualification Rules\n* Check the Form field Years of Experience against the total actual timeline calculated from the CV Text.\n* If a candidate selects 2+ years on the form, but their CV text shows less than 2 years of professional work experience, this is fraud.\n* If a candidate fabricates job titles or lists unverified high-level roles not supported by the CV text chronology, this is fraud.\n* Penalty: Any detected fraud results in immediate disqualification. Set Final_Decision strictly to Rejected.\n\n# Pipeline Classification Criteria\n1. Rejected: Candidate failed verification, provided false information, or mismatched their form declaration.\n2. Training Department: Honest candidate with less than 1 year of IT/AI experience.\n3. Advanced Recruitment Pipeline: Honest candidate with 2 or more years of IT/AI experience.\n\n# Mandatory Output Format\nYou must output ONLY a raw valid JSON object. No text before or after. No markdown code blocks. Use this exact schema:\n\n{\n  \"Final_Decision\": \"Rejected\" or \"Training Department\" or \"Advanced Recruitment Pipeline\",\n  \"Candidate_Name\": \"Full name from CV\",\n  \"Candidate_Email\": \"Email from form\",\n  \"Form_Experience_Declared\": \"Original form value\",\n  \"CV_Experience_Verified\": \"Actual calculated experience from CV\",\n  \"Fraud_Flag\": true or false,\n  \"Fraud_Reason\": \"1-sentence detail if fraud, otherwise empty string\",\n  \"Manager_Summary\": \"1-sentence professional summary of candidate\",\n  \"Email_Subject\": \"Professional subject line matching Final_Decision\",\n  \"Email_Body\": \"Complete formal email to candidate matching Final_Decision, no placeholders\"\n}\n\n# Behavior\nYou are accurate, cold, objective. No benefit of the doubt. If mismatch exists, reject.\n\n# CRITICAL Tool Usage Rules\n- If Final_Decision is \"Rejected\":\n  1. Call the Gmail tool immediately to send rejection email to the candidate email address.\n  2. Call the Google Sheets tool to update Application_Result = مرفوض (match by candidate email).\n  3. Stop all processing after these two tool calls.\n- If Final_Decision is \"Training Department\" or \"Advanced Recruitment Pipeline\":\n  Do NOT call any tools. The workflow will handle emails and sheet updates automatically.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -512,
+        48
+      ],
+      "id": "f95fb6b0-784d-442d-98de-d447d559faf5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        272
+      ],
+      "id": "dcd3bac0-5876-4642-a038-93ef2491fa84",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Me8694uGyd8NgBLz",
+          "name": "Google Gemini(PaLM) Api account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40",
+          "mode": "list",
+          "cachedResultName": "cv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "File Name": "={{ $json['Full Name'] }}",
+            "Email Address": "={{ $json['Email Address'] }}",
+            "Phone Number": "={{ $json['Phone Number'] }}",
+            "Position Applied For": "={{ $json['Position Applied For'] }}",
+            "Years of Experience": "={{ $json['Years of Experience'] }}",
+            "CV": "={{ $json['CV / Resume'] }}",
+            "LinkedIn Profile URL": "={{ $json['LinkedIn Profile URL'] }}"
+          },
+          "matchingColumns": [
+            "File Name"
+          ],
+          "schema": [
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Position Applied For",
+              "displayName": "Position Applied For",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Years of Experience",
+              "displayName": "Years of Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Profile URL",
+              "displayName": "LinkedIn Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -784,
+        240
+      ],
+      "id": "fe51a85f-0ed1-46d6-8798-c729ebbe3f15",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YNF898KnGyie6p9G",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "pipeline-check",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Training Department",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "38e2abd3-cec3-4d8c-a15c-d04e15ece1c1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('📋 CV Application Form').item.json['Email Address'] }}",
+        "subject": "Update on Your Application for Employment",
+        "message": "=<!DOCTYPE html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>دعوة للمقابلة الشخصية</title>\n    <style>\n        body {\n            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n            background-color: #f4f7f6;\n            margin: 0;\n            padding: 0;\n            text-align: right;\n        }\n        .email-container {\n            max-width: 600px;\n            margin: 20px auto;\n            background-color: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0 4px 10px rgba(0,0,0,0.05);\n            border: 1px solid #e1e8ed;\n        }\n        .header {\n            background-color: #0f766e; /* لون زيتي احترافي ومهدئ */\n            color: #ffffff;\n            padding: 30px 20px;\n            text-align: center;\n        }\n        .header h1 {\n            margin: 0;\n            font-size: 24px;\n            font-weight: 600;\n        }\n        .content {\n            padding: 30px 25px;\n            line-height: 1.8;\n            color: #333333;\n        }\n        .content p {\n            margin: 0 0 15px 0;\n            font-size: 16px;\n        }\n        .interview-box {\n            background-color: #f0fdfa;\n            border-right: 4px solid #0f766e;\n            padding: 20px;\n            margin: 20px 0;\n            border-radius: 4px;\n        }\n        .info-item {\n            margin-bottom: 10px;\n            font-size: 16px;\n        }\n        .info-item strong {\n            color: #0f766e;\n        }\n        .btn-container {\n            text-align: center;\n            margin: 25px 0 10px 0;\n        }\n        .btn {\n            background-color: #0f766e;\n            color: #ffffff !important;\n            text-decoration: none;\n            padding: 12px 30px;\n            border-radius: 5px;\n            font-size: 16px;\n            font-weight: bold;\n            display: inline-block;\n            box-shadow: 0 2px 5px rgba(0,0,0,0.1);\n        }\n        .footer {\n            background-color: #f4f7f6;\n            text-align: center;\n            padding: 15px;\n            font-size: 12px;\n            color: #777777;\n            border-top: 1px solid #e1e8ed;\n        }\n    </style>\n</head>\n<body>\n\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <h1>دعوة للمقابلة الشخصية</h1>\n        </div>\n        \n        <div class=\"content\">\n            <p>مرحباً <strong>{{ $('📋 CV Application Form').item.json['Full Name'] }}</strong>،</p>\n            <p>يسعدنا إعلامكِ بأننا قمنا بمراجعة سيرتكِ الذاتية المرفقة لوظيفة <strong>{{ $('📋 CV Application Form').item.json['Position Applied For'] }}</strong>، ونود دعوتكِ لإجراء مقابلة شخصية (عن بُعد) للتعرف عليكِ وعلى مؤهلاتكِ بشكل أفضل.</p>\n            \n            <div class=\"interview-box\">\n                <div class=\"info-item\"><strong>التاريخ:</strong>15/6/2026 </div>\n                <div class=\"info-item\"><strong>الوقت:</strong> 14:00</div>\n                <div class=\"info-item\"><strong>نوع المقابلة:</strong> أونلاين (Online Interview)</div>\n            </div>\n            \n       \n\n            <p style=\"margin-top: 25px;\">نتمنى لكِ التوفيق، وننتظر لقاءكِ قريباً.</p>\n            <p>أطيب التحيات،<br><strong>فريق الموارد البشرية والتوظيف</strong></p>\n        </div>\n        \n    </div>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false,
+          "replyToSenderOnly": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        -48
+      ],
+      "id": "c52c891f-a7a9-48eb-9f49-c5ab7f838ffb",
+      "name": "Send a message",
+      "webhookId": "670da5fd-1020-4307-b0fa-ddde5d57da40",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9vCw8wTQcfyrZv3H",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "fhm156@hotmail.com",
+        "subject": "Head of Training Department",
+        "message": "=<!DOCTYPE html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 20px; text-align: right; }\n        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e9ecef; overflow: hidden; }\n        .header { background-color: #1e3a8a; color: white; padding: 25px; text-align: center; }\n        .header h2 { margin: 0; font-size: 22px; }\n        .content { padding: 25px; line-height: 1.8; }\n        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }\n        .info-table td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 15px; }\n        .info-table td.label { font-weight: bold; color: #1e3a8a; width: 35%; }\n        .footer { background-color: #f1f5f9; text-align: center; padding: 15px; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h2>إشعار: طلب تدريب / توظيف جديد</h2>\n        </div>\n        <div class=\"content\">\n            <p>السيد رئيس قسم التدريب المحترم،</p>\n            <p>نحيطكم علماً بأنه قد تم استلام طلب جديد :</p>\n            \n            <table class=\"info-table\">\n                <tr>\n                    <td class=\"label\">اسم المتقدم:</td>\n                    <td>{{ $('📋 CV Application Form').item.json['Full Name'] }} </td>\n                </tr>\n                <tr>\n                    <td class=\"label\">البريد الإلكتروني:</td>\n                    <td> {{ $('📋 CV Application Form').item.json['Email Address'] }}</td>\n                </tr>\n                <tr>\n                    <td class=\"label\">ملخص التقييم الأولي:</td>\n                    <td> {{ $json.output }}</td>\n                </tr>\n            </table>\n            </strong></p>\n        </div>\n        <div class=\"footer\">\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        -48
+      ],
+      "id": "30f6d82d-0a16-44c6-9dfe-77b8ca059f5d",
+      "name": "Send a message1",
+      "webhookId": "03859e43-8b7a-4a8f-a395-c7fd32eb9929",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9vCw8wTQcfyrZv3H",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "fhm156@hotmail.com",
+        "subject": "Interview Scheduled Notification",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Interview Scheduled Notification</title>     <style>         body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background-color: #f4f7f6;             margin: 0;             padding: 0;             text-align: left;             color: #333333;         }         .email-container {             max-width: 600px;             margin: 20px auto;             background-color: #ffffff;             border-radius: 8px;             overflow: hidden;             box-shadow: 0 4px 10px rgba(0,0,0,0.05);             border: 1px solid #e1e8ed;         }         .header {             background-color: #1e3a8a; /* لون أزرق رسمي وداكن يناسب الإشعارات الداخلية */             color: #ffffff;             padding: 30px 20px;             text-align: center;         }         .header h1 {             margin: 0;             font-size: 22px;             font-weight: 600;             letter-spacing: 0.5px;         }         .content {             padding: 30px 25px;             line-height: 1.8;         }         .content p {             margin: 0 0 15px 0;             font-size: 16px;         }         .details-box {             background-color: #f8fafc;             border-left: 4px solid #1e3a8a;             padding: 20px;             margin: 20px 0;             border-radius: 4px;         }         .info-item {             margin-bottom: 10px;             font-size: 15px;         }         .info-item strong {             color: #1e3a8a;             display: inline-block;             width: 140px;         }         .footer {             background-color: #f4f7f6;             text-align: center;             padding: 15px;             font-size: 12px;             color: #777777;             border-top: 1px solid #e1e8ed;         }     </style> </head> <body>      <div class=\"email-container\">         <div class=\"header\">             <h1>New Interview Scheduled</h1>         </div>                  <div class=\"content\">             <p>Dear <strong>HR Team</strong>,</p>                          <p>We would like to inform you that an interview has been scheduled with the following candidate:</p>                          <div class=\"details-box\">                 <div class=\"info-item\"><strong>Candidate Name:</strong> {{ $('📋 CV Application Form').item.json['Full Name'] }}</div>                 <div class=\"info-item\"><strong>Position:</strong> {{ $('📋 CV Application Form').item.json['Position Applied For'] }}</div>                 <div class=\"info-item\"><strong>Date:</strong> {{ $json.interview_date }}</div>                 <div class=\"info-item\"><strong>Time:</strong> {{ $json.interview_time }}</div>             </div>                          <p>Please proceed accordingly and prepare for the interview session.</p>                          <br>             <p>Best regards,</p>             <p><strong>Recruitment Automation System</strong></p>         </div>                  <div class=\"footer\">             Internal Notification • Generated automatically by n8n.         </div>     </div>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        144
+      ],
+      "id": "01b4f4bc-886d-47c8-9029-f72f1fd50f53",
+      "name": "Send a message2",
+      "webhookId": "7a9096b2-6d9b-414a-8a9a-63100ead4683",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9vCw8wTQcfyrZv3H",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('📋 CV Application Form').item.json['Email Address'] }}",
+        "subject": "Interview Appointment Confirmation",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Interview Invitation</title>     <style>         body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background-color: #f4f7f6;             margin: 0;             padding: 0;             text-align: left;             color: #333333;         }         .email-container {             max-width: 600px;             margin: 20px auto;             background-color: #ffffff;             border-radius: 8px;             overflow: hidden;             box-shadow: 0 4px 10px rgba(0,0,0,0.05);             border: 1px solid #e1e8ed;         }         .header {             background-color: #0f766e; /* لون زيتي احترافي ومناسب للمقابلات */             color: #ffffff;             padding: 30px 20px;             text-align: center;         }         .header h1 {             margin: 0;             font-size: 22px;             font-weight: 600;             letter-spacing: 0.5px;         }         .content {             padding: 30px 25px;             line-height: 1.8;         }         .content p {             margin: 0 0 15px 0;             font-size: 16px;         }         .details-box {             background-color: #f0fdfa;             border-left: 4px solid #0f766e;             padding: 20px;             margin: 20px 0;             border-radius: 4px;         }         .info-item {             margin-bottom: 10px;             font-size: 15px;         }         .info-item strong {             color: #0f766e;             display: inline-block;             width: 180px;         }         .btn-container {             text-align: center;             margin: 25px 0 10px 0;         }         .btn {             background-color: #0f766e;             color: #ffffff !important;             text-decoration: none;             padding: 12px 30px;             border-radius: 5px;             font-size: 15px;             font-weight: bold;             display: inline-block;             box-shadow: 0 2px 5px rgba(0,0,0,0.1);         }         .footer {             background-color: #f4f7f6;             text-align: center;             padding: 15px;             font-size: 12px;             color: #777777;             border-top: 1px solid #e1e8ed;         }     </style> </head> <body>      <div class=\"email-container\">         <div class=\"header\">             <h1>Interview Invitation</h1>         </div>                  <div class=\"content\">             <p>Dear <strong>{{ $('📋 CV Application Form').item.json['Full Name'] }}</strong>,</p>                          <p>We are pleased to inform you that an interview has been scheduled for the position you applied for. Please find the schedule details below:</p>                          <div class=\"details-box\">                 <div class=\"info-item\"><strong>Candidate Name:</strong> {{ $('📋 CV Application Form').item.json['Full Name'] }}</div>                 <div class=\"info-item\"><strong>Date:</strong> {{ $json.interview_date }}</div>                 <div class=\"info-item\"><strong>Time:</strong> {{ $json.interview_time }}</div>                 <div class=\"info-item\"><strong>Location / Meeting Link:</strong> Online (Google Meet)</div>             </div>                          <p>Please make sure to be available on time. If you are unable to attend, kindly inform us in advance.</p>                          <div class=\"btn-container\">                 <a href=\"{{ $json.meeting_link }}\" class=\"btn\" target=\"_blank\">Join the Interview</a>             </div>                          <p style=\"margin-top: 25px;\">We look forward to meeting you.</p>             <p>Best regards,</p>             <p><strong>Human Resources Department</strong></p>         </div>                  <div class=\"footer\">             This is an automated invitation from our Recruitment Management System.         </div>     </div>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        144
+      ],
+      "id": "a1a438d3-4cff-48a4-9c46-c35851df98c1",
+      "name": "Send a message3",
+      "webhookId": "e396fd22-10de-440c-8658-28b0a1d06389",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9vCw8wTQcfyrZv3H",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=CV___Resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        48
+      ],
+      "id": "287e0f79-fcc5-4e51-86ec-ee2cd32ed11f",
+      "name": "📄 Extract CV Text"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('📋 CV Application Form').item.json['Email Address'] }}",
+        "subject": "Application Rejection Notice",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Application Update</title>     <style>         body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background-color: #f4f7f6;             margin: 0;             padding: 0;             text-align: left;             color: #333333;         }         .email-container {             max-width: 600px;             margin: 20px auto;             background-color: #ffffff;             border-radius: 8px;             overflow: hidden;             box-shadow: 0 4px 10px rgba(0,0,0,0.05);             border: 1px solid #e1e8ed;         }         .header {             background-color: #7c2d12; /* لون دافئ وهادئ يناسب رسائل الاعتذار المنهية */             color: #ffffff;             padding: 30px 20px;             text-align: center;         }         .header h1 {             margin: 0;             font-size: 22px;             font-weight: 600;             letter-spacing: 0.5px;         }         .content {             padding: 30px 25px;             line-height: 1.8;         }         .content p {             margin: 0 0 15px 0;             font-size: 16px;         }         .status-box {             background-color: #fff7ed;             border-left: 4px solid #c2410c;             padding: 18px;             margin: 20px 0;             border-radius: 4px;             font-size: 15px;             font-weight: 500;             color: #9a3412;         }         .footer {             background-color: #f4f7f6;             text-align: center;             padding: 15px;             font-size: 12px;             color: #777777;             border-top: 1px solid #e1e8ed;         }     </style> </head> <body>      <div class=\"email-container\">         <div class=\"header\">             <h1>Update on Your Application</h1>         </div>                  <div class=\"content\">             <p>Dear <strong>{{ $('📋 CV Application Form').item.json['Full Name'] }}</strong>,</p>                          <p>Thank you for your interest in the <strong>{{ $('📋 CV Application Form').item.json['Position Applied For'] }}</strong> position and for taking the time to submit your application.</p>                          <div class=\"status-box\">                 Your job application has been rejected due to conflicting information provided in your submission.             </div>                          <p>Our recruitment team carefully reviews all details to ensure compliance with our hiring standards. Unfortunately, due to the inconsistencies found between the submitted documents, we are unable to move forward with your candidacy at this time.</p>                          <p>We appreciate the effort you put into your application and wish you the very best in your future professional endeavors.</p>                          <br>             <p>Sincerely,</p>             <p><strong>Human Resources Department</strong></p>         </div>                  <div class=\"footer\">             This is an automated notification from our Recruitment Management System. Please do not reply directly to this email.         </div>     </div>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        272
+      ],
+      "id": "3db8a1f1-e03b-4c13-8e87-f4ef5c4ef027",
+      "name": "Send a message in Gmail",
+      "webhookId": "63bd03a2-decf-481d-b127-5113e850e478",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9vCw8wTQcfyrZv3H",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "not-rejected-check",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Rejected",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        128,
+        144
+      ],
+      "id": "35e1f8c0-f8c9-470f-a002-4a2812ae3fc6",
+      "name": "🚫 Not Rejected?"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40",
+          "mode": "list",
+          "cachedResultName": "cv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Address": "={{ $('📋 CV Application Form').item.json['Email Address'] }}",
+            "Application Result": "بانتظار المقباله"
+          },
+          "matchingColumns": [
+            "Email Address"
+          ],
+          "schema": [
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Position Applied For",
+              "displayName": "Position Applied For",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Years of Experience",
+              "displayName": "Years of Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn Profile URL",
+              "displayName": "LinkedIn Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Application Result",
+              "displayName": "Application Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        48
+      ],
+      "id": "f3642b49-47f8-4e61-a025-7ab0c9c73a8e",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YNF898KnGyie6p9G",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40",
+          "mode": "list",
+          "cachedResultName": "cv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BShPJXIJLdQCrn9yQSTun0OqygEKJAlIrHHbNyVat40/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Application Result": "مرفوض",
+            "Email Address": "={{ $('📋 CV Application Form').item.json['Email Address'] }}"
+          },
+          "matchingColumns": [
+            "Email Address"
+          ],
+          "schema": [
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Position Applied For",
+              "displayName": "Position Applied For",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Years of Experience",
+              "displayName": "Years of Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn Profile URL",
+              "displayName": "LinkedIn Profile URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Application Result",
+              "displayName": "Application Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -304,
+        272
+      ],
+      "id": "427df82e-4791-4b9e-933e-e88641b04cf8",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YNF898KnGyie6p9G",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "📋 CV Application Form": [
+      {
+        "json": {
+          "Full Name": "Farah masaadeh",
+          "Email Address": "fhm156@hotmail.com",
+          "Phone Number": "+962779880190",
+          "Position Applied For": "Data Analyst",
+          "Years of Experience": "3-5 years",
+          "CV / Resume": [
+            {
+              "filename": "Farah Almasa'deh cv.pdf",
+              "mimetype": "application/pdf",
+              "size": 111287
+            }
+          ],
+          "LinkedIn Profile URL": "",
+          "submittedAt": "2026-05-16T18:03:25.772+03:00",
+          "formMode": "test"
+        },
+        "binary": {
+          "CV___Resume": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "Farah Almasa'deh cv.pdf",
+            "id": "filesystem-v2:workflows/TL5pOQxpBcFHJ8Eq/executions/temp/binary_data/89ea0937-65d3-42ce-b36c-2399d398eded",
+            "fileSize": "111 kB",
+            "bytes": 111287
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "📄 Extract CV Text": [
+      {
+        "json": {
+          "numpages": 1,
+          "numrender": 1,
+          "info": {
+            "PDFFormatVersion": "1.4",
+            "Language": "ar",
+            "EncryptFilterName": null,
+            "IsLinearized": false,
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "IsCollectionPresent": false,
+            "IsSignaturesPresent": false,
+            "Title": "0779880190",
+            "Creator": "Canva",
+            "Producer": "Canva",
+            "CreationDate": "D:20260425231450+00'00'",
+            "ModDate": "D:20260425231450+00'00'",
+            "Keywords": "DAHHs8S6078,BAFR10wsARE,0",
+            "Author": "Farah Haroun"
+          },
+          "metadata": {
+            "dc:title": "07798801900779880190"
+          },
+          "text": "D a t a S c i e n c e a n d A I\nF A R A H A L M A S A ’ D E H\nE D U C A T I O N\nC O N T A C T\nS O F T S K I L L S\n0779880190\nAqaba-jordan\nFarahAlmasaadeh@outlook.com\nBachelor of Science in Data Science\n& Artificial Intelligence\nAl-Hussein Bin Talal University\n2022 - 2026\nResponsible\nTeamwork\nTime Management\nEffective Communication\nA B O U T M E\nE X P E R I E N C E\nC E R T I F I C A T I O N S\nData Science and Artificial Intelligence graduate with hands-on\nexperience in machine learning\nmodel development, AI system design, and IT infrastructure support.\nExperienced in data\npreprocessing, model optimization, and system deployment. Strong\nanalytical thinker passionate\nabout building intelligent, scalable, and accessible AI-driven solutions.\nManaged Active Directory accounts and domain joining for enterprise devices\nDiagnosed and resolved hardware and system-level technical issues\nPerformed SSD upgrades and hardware component replacements\nCreated and deployed master system images for batch device configuration\nSupported networking services including DNS and DHCP\nIT Intern - Aqaba Special Economic Zone Authority (ASEZA)\nFeb 2026 – Apr 2026\nAI-Powered Assistive System for Visually and Hearing Impaired\nDesigned and implemented AI-based accessibility system\nBuilt and fine-tuned machine learning models for gesture recognition\nApplied data preprocessing and model optimization techniques\nDeveloped sign language translation system using specialized datasets\nhttps://github.com/FY0499\nPROJECTS\nDeep Learning Specialist – 2025 (60 HOURS)\nAI and Python Developer – 2024 (60 HOURS)\nCloud Computing Fundamentals – 2025 (32 Hours)\nhttps://www.linkedin.com/in/farah-\nalmasaadeh-a92a7b266/\nProgramming: Python\nMachine Learning: Supervised\nLearning, Model Optimization,\nFeature Engineering\nHardware: Troubleshooting, SSD\nUpgrades\nDeep Learning: Neural Networks,\nModel Fine-Tuning\nData Analysis: Data Cleaning,\nData Preprocessing, Exploratory\nData Analysis\nT E C H N I C A L S K I L L S\nOct 2025 – Jan 2026",
+          "version": "5.3.31"
+        },
+        "binary": {},
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "📋 CV Application Form": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📄 Extract CV Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🚫 Not Rejected?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Extract CV Text": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚫 Not Rejected?": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c56c777d-2ee6-4b75-b6ea-97ab3a6b59f1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1f5559b3682e0b1c865628509d007d0fa3d272eb5f1a375cbd5311880930e3aa"
+  },
+  "id": "TL5pOQxpBcFHJ8Eq",
+  "tags": []
+}
