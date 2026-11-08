@@ -1,6 +1,7 @@
 # AI CV Screening and Recruitment Automation
 
 I built this n8n workflow to process job applications, extract information from submitted CVs, and use AI to compare the candidate's declared experience with the information found in their CV.
+<img width="671" height="228" alt="image" src="https://github.com/user-attachments/assets/aa203f57-b4f4-481f-8453-1668fd64efe6" />
 
 ## How it works
 
