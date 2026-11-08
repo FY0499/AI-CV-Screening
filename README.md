@@ -1,7 +1,8 @@
 # AI CV Screening and Recruitment Automation
 
 I built this n8n workflow to process job applications, extract information from submitted CVs, and use AI to compare the candidate's declared experience with the information found in their CV.
-<img width="671" height="228" alt="image" src="https://github.com/user-attachments/assets/aa203f57-b4f4-481f-8453-1668fd64efe6" />
+
+<img width="671" height="228" alt="AI CV Screening and Recruitment Automation workflow demo" src="https://github.com/user-attachments/assets/aa203f57-b4f4-481f-8453-1668fd64efe6" />
 
 ## How it works
 
@@ -27,8 +28,4 @@ n8n, Google Gemini, AI Agent, PDF extraction, Google Sheets, Gmail, JavaScript, 
 
 ## Setup
 
-Import [workflow.json](./workflow.json) into n8n, configure your Gemini, Google Sheets, and Gmail credentials, then review the application form fields, recruitment routing conditions, and email templates before testing with sample CVs.
-
-## Notes
-
-The workflow includes automated candidate routing based on its configured screening criteria. Review the criteria and screening outputs carefully before using the workflow in a real recruitment process.
+Import [workflow.json](./workflow.json) into n8n, configure your Gemini, Google Sheets, and Gmail credentials, then review the application form fields, recruitment routing conditions, and email templates before testing with sample CVs. Review AI screening results before taking any final recruitment decision.
